@@ -42,6 +42,15 @@ Run it from the repo root, or put the repo on `PYTHONPATH`, so Harbor can import
 | `fallbacks` | `default` | `default` lets the API re-run a refused request on another model. Use `none` for benchmark numbers, so every step comes from the model you named. |
 | `install_python` | `true` | Install `python3` in the task image if it is missing. |
 
+## Benchmark: one task, every angle
+
+[`benchmarks/tally`](benchmarks/tally) is a single task built to compare harnesses on the same model. The agent fixes a bug, fixes a performance problem and builds a specified feature with tests in a small Python repository. A hidden grader scores feature correctness, the bug fix, regressions, performance, the quality of the agent's tests (by mutation testing) and code hygiene, out of 100. Time, turns, tool calls, tokens and cost are reported alongside.
+
+```bash
+python benchmarks/tally/build.py --check          # validate the grader, no API calls
+ATTEMPTS=3 benchmarks/tally/run.sh                # all four harnesses, then the report
+```
+
 ## Example: one prompt, four harnesses
 
 [`examples/svg-compare`](examples/svg-compare) runs the same task through minipy, Claude Code, mini-swe-agent and Pi: build a complex 3D scene as a static 1200×800 SVG. All four used Claude Opus 5.5 at medium effort, one attempt each, in identical Harbor containers.
@@ -66,3 +75,7 @@ To reproduce it:
 ```bash
 ANTHROPIC_API_KEY=... examples/svg-compare/run.sh
 ```
+
+## Running other harnesses
+
+[`scripts/run-harnesses.sh`](scripts/run-harnesses.sh) runs any Harbor task with minipy, Claude Code, mini-swe-agent and Pi on the same model and effort. It takes an Anthropic API key or an OAuth access token. With a token, Pi runs through [`harnesses/pi_bearer.py`](harnesses/pi_bearer.py), which passes the token as a header so Pi stays in its normal mode.

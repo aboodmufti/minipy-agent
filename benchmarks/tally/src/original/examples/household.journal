@@ -1,0 +1,18 @@
+# Household finances, early 2026
+option base USD
+
+P 2026-01-01 EUR 1.0800
+P 2026-03-01 EUR 1.1000
+
+2026-01-01 checking 3,000.00 USD opening balance
+2026-01-01 savings 1,000.00 EUR opening balance
+2026-01-05 groceries 82.40 USD market
+2026-01-05 checking -82.40 USD market
+2026-01-28 checking 2,450.00 USD salary
+2026-02-01 checking -1,450.00 USD rent
+2026-02-09 groceries 96.10 USD market
+2026-02-09 checking -96.10 USD market
+2026-03-01 savings 900.00 EUR bonus
+2026-03-14 groceries 65.20 USD market      ; weekly shop
+2026-03-14 checking -65.20 USD market
+2026-03-20 savings 90.00 EUR interest
