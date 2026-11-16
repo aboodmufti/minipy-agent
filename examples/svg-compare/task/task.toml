@@ -1,0 +1,21 @@
+version = "1.0"
+
+[task]
+name = "minipy/svg-3d-scene"
+description = "Create a complex, visually impressive 3D scene as a static SVG."
+
+[verifier]
+timeout_sec = 300.0
+
+[agent]
+timeout_sec = 2400.0
+
+[environment]
+build_timeout_sec = 600.0
+docker_image = "python:3.12-slim"
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
