@@ -153,6 +153,9 @@ class LedgerTest(unittest.TestCase):
         self.assertEqual([row.memo for row in rows], ["rent", "salary"])
         self.assertEqual([row.running for row in rows], [Decimal("-30.00"), Decimal("70.00")])
 
+    def test_empty_journal_in_other_currency(self):
+        self.assertEqual(Ledger(parse("")).balances(currency="EUR"), {})
+
     def test_end_date_includes_rule_start(self):
         ledger = Ledger(
             parse("2026-01-01 bank 10.00 USD\n~ monthly 2026-03-01 bank -1.00 USD\n")
