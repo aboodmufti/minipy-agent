@@ -144,6 +144,15 @@ class OccurrenceDatesTest(unittest.TestCase):
             dates("2026-05-01"),
         )
 
+    def test_through_last_representable_date(self):
+        result = occurrences(rule("yearly", date(9990, 3, 15)), date.max)
+        self.assertEqual(result[0], date(9990, 3, 15))
+        self.assertEqual(result[-1], date(9999, 3, 15))
+        self.assertEqual(len(result), 10)
+        self.assertEqual(
+            occurrences(rule("weekly", date(9999, 12, 1)), date.max)[-1], date(9999, 12, 29)
+        )
+
     def test_ten_years_daily(self):
         start, through = date(2026, 1, 1), date(2035, 12, 31)
         result = occurrences(rule("daily", start), through)

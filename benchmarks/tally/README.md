@@ -23,7 +23,7 @@ A hidden grader (`grader/grade.py`) scores the final state of `/app` out of 100:
 
 | Part | Points | How it is measured |
 |---|---|---|
-| Feature | 35 | 30 hidden tests of the spec: dates, parsing, errors, balances, registers, CLI output. |
+| Feature | 35 | 31 hidden tests of the spec: dates, parsing, errors, balances, registers, CLI output. |
 | Bug | 15 | 10 hidden tests of rate lookups, including same-day prices, prices added out of order and after a lookup, and dates before the first price. |
 | Regressions | 10 | The original tests, run from pristine copies, so editing them doesn't help. |
 | Performance | 15 | `balance` on the big journal, timed against the reference solution in the same container. Full points up to 1.5× the reference, zero at 15× or slower, logarithmic in between. Output must match the reference exactly. |
@@ -43,7 +43,7 @@ Calibration, from `build.py --check` and Harbor runs of the built-in agents:
 | Run | Score |
 |---|---|
 | Reference solution (Harbor `oracle` agent) | 100 |
-| No changes (Harbor `nop` agent) | 21.4 |
+| No changes (Harbor `nop` agent) | 21.3 |
 
 ## Running it
 

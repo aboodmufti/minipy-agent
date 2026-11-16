@@ -52,10 +52,18 @@ def occurrences(rule: RecurringRule, through: date) -> list[date]:
     Both ends are inclusive, and ``rule.until`` (if set) also limits the result.
     Dates are returned in ascending order.
     """
+    if rule.freq not in FREQUENCIES:
+        raise ValueError(f"unknown frequency {rule.freq!r}")
     last = through if rule.until is None else min(through, rule.until)
     result = []
     k = 0
-    while (day := _occurrence(rule, k)) <= last:
+    while True:
+        try:
+            day = _occurrence(rule, k)
+        except (OverflowError, ValueError):
+            break  # past the last date Python can represent (9999-12-31)
+        if day > last:
+            break
         result.append(day)
         k += 1
     return result

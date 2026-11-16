@@ -80,6 +80,12 @@ class OccurrencesTest(unittest.TestCase):
             [date(2026, 1, 15), date(2026, 2, 15), date(2026, 3, 15)],
         )
 
+    def test_through_last_representable_date(self):
+        self.assertEqual(
+            occurrences(rule("monthly", date(9999, 10, 31)), date.max),
+            [date(9999, 10, 31), date(9999, 11, 30), date(9999, 12, 31)],
+        )
+
     def test_boundaries_at_start(self):
         start = date(2026, 5, 5)
         self.assertEqual(occurrences(rule("weekly", start), start), [start])
