@@ -74,7 +74,7 @@ class Ledger:
         for t in self.transactions(as_of):
             totals[t.account] += self.rates.convert(t.amount, t.currency, t.date)
         target = currency or self.base
-        if target != self.base:
+        if target != self.base and totals:
             on = as_of or self.end_date()
             rate = self.rates.rate(target, on)
             totals = {account: value / rate for account, value in totals.items()}

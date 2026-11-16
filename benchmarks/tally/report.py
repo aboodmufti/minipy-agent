@@ -143,7 +143,7 @@ def markdown(rows: list[dict], runs: dict[str, list[dict]]) -> str:
         p = r["parts"]
         lines.append(
             f"| {r['harness']} | {r['attempts']} | **{fmt(r['score'])}** | "
-            f"{r['score_min']:.0f}–{r['score_max']:.0f} | "
+            f"{r['score_min']:.1f}–{r['score_max']:.1f} | "
             + " | ".join(fmt(p[k]) for k in PARTS)
             + " |"
         )
