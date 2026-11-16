@@ -64,8 +64,8 @@ MUTANTS = [
         "name": "through-exclusive",
         "why": "an occurrence on the through date is excluded",
         "file": "tally/recurring.py",
-        "old": "while (day := _occurrence(rule, k)) <= last:",
-        "new": "while (day := _occurrence(rule, k)) < last:",
+        "old": "        if day > last:\n",
+        "new": "        if day >= last:\n",
     },
     {
         "name": "skips-start",
