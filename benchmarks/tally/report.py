@@ -4,8 +4,10 @@
 
 JOBS_DIR holds one folder per harness, as written by scripts/run-harnesses.sh.
 Prints a Markdown report. Cost is computed the same way for every harness from
-its token counts, at Claude Opus 5.5 list prices (input not read from cache is
-priced as a cache write, which is what nearly all of it is in these agents).
+its token counts, at the list price of the model the run used (input not read
+from cache is priced as a cache write, which is what nearly all of it is in these
+agents). Claude Haiku 5.5 is priced at its rate for prompts up to 100K tokens; a
+run whose prompts grow past that pays up to 5x more, so treat it as a lower bound.
 """
 
 from __future__ import annotations
@@ -16,7 +18,12 @@ import statistics
 from datetime import datetime
 from pathlib import Path
 
-PRICE_PER_MTOK = {"cache_write": 5.00, "cache_read": 0.20, "output": 20.00}
+# USD per million tokens. Cache writes are 5-minute writes (1.25x input).
+PRICES = {
+    "claude-opus-5-5": {"cache_write": 5.00, "cache_read": 0.20, "output": 20.00},
+    "claude-sonnet-5-5": {"cache_write": 2.50, "cache_read": 0.10, "output": 10.00},
+    "claude-haiku-5-5": {"cache_write": 0.125, "cache_read": 0.01, "output": 0.50},
+}
 PARTS = ["feature", "bug", "regressions", "performance", "tests", "hygiene"]
 
 
@@ -49,11 +56,18 @@ def trial(path: Path) -> dict:
     tokens_in = agent.get("n_input_tokens") or 0
     cached = agent.get("n_cache_tokens") or 0
     tokens_out = agent.get("n_output_tokens") or 0
+    model = ((result.get("agent_info") or {}).get("model_info") or {}).get("name") or ""
+    price = PRICES.get(model)
     cost = (
-        (tokens_in - cached) * PRICE_PER_MTOK["cache_write"]
-        + cached * PRICE_PER_MTOK["cache_read"]
-        + tokens_out * PRICE_PER_MTOK["output"]
-    ) / 1e6
+        (
+            (tokens_in - cached) * price["cache_write"]
+            + cached * price["cache_read"]
+            + tokens_out * price["output"]
+        )
+        / 1e6
+        if price
+        else None
+    )
     score_path = path / "verifier" / "score.json"
     score = json.loads(score_path.read_text()) if score_path.exists() else None
     turns, calls = turns_and_calls(path / "agent", result)
@@ -69,7 +83,8 @@ def trial(path: Path) -> dict:
         "input_tokens": tokens_in,
         "cached_tokens": cached,
         "output_tokens": tokens_out,
-        "cost_usd": round(cost, 4),
+        "model": model,
+        "cost_usd": None if cost is None else round(cost, 4),
         "error": bool(result.get("exception_info")),
     }
 
@@ -100,6 +115,7 @@ def summary(name: str, trials: list[dict]) -> dict:
     scores = [t["score"] for t in trials]
     return {
         "harness": name,
+        "model": ", ".join(sorted({t["model"] for t in trials})),
         "attempts": len(trials),
         "score": mean(scores),
         "score_min": min(scores),
@@ -117,6 +133,8 @@ def summary(name: str, trials: list[dict]) -> dict:
 def markdown(rows: list[dict], runs: dict[str, list[dict]]) -> str:
     lines = [
         "## Score (out of 100)",
+        "",
+        f"Model: {', '.join(sorted({r['model'] for r in rows}))}",
         "",
         "| Harness | Runs | Score | Range | Feature /35 | Bug /15 | Regr. /10 | Perf /15 | Tests /15 | Hygiene /10 |",
         "|---|---|---|---|---|---|---|---|---|---|",
@@ -141,7 +159,7 @@ def markdown(rows: list[dict], runs: dict[str, list[dict]]) -> str:
         lines.append(
             f"| {r['harness']} | {fmt(r['minutes'])} | {fmt(r['turns'], '.0f')} | "
             f"{fmt(r['tool_calls'], '.0f')} | {fmt(r['input_tokens'], ',.0f')} | "
-            f"{fmt(r['output_tokens'], ',.0f')} | ${fmt(r['cost_usd'], '.2f')} | "
+            f"{fmt(r['output_tokens'], ',.0f')} | ${fmt(r['cost_usd'], '.3f')} | "
             f"{fmt(per_dollar, '.0f')} |"
         )
     lines += ["", "## Per run", ""]
